@@ -1,5 +1,4 @@
 using GameData.Repositories;
-using GameForClients.Properties;
 using GameForClients.Servies;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +24,7 @@ namespace GameForClients
             var moveRepo = new MoveRepository(dbContext);
             var userRepository = new UserRepository(dbContext);
             var gameService = new GameService(gameRepo, shipRepo, moveRepo);
-            Application.Run(new Login(dbContext, gameService));
+            Application.Run(new Login(dbContext, gameService, gameRepo));
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.

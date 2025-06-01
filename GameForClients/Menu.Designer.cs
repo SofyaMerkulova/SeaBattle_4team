@@ -74,7 +74,7 @@
             btnForStars.TabIndex = 7;
             btnForStars.Text = "Начать игру";
             btnForStars.UseVisualStyleBackColor = false;
-            btnForStars.Click += btnForRegistration_Click;
+     
             // 
             // Menu
             // 

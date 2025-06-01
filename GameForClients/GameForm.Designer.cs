@@ -1,6 +1,6 @@
-﻿namespace GameForClients.Properties
+﻿namespace GameForClients
 {
-    partial class Game
+    partial class GameForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Game));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
             panel2 = new Panel();
             panelEnemy = new Panel();
             panelPlayer = new Panel();
@@ -60,16 +60,16 @@
             panelEnemy.BackColor = Color.MidnightBlue;
             panelEnemy.Location = new Point(463, 81);
             panelEnemy.Name = "panelEnemy";
-            panelEnemy.Size = new Size(420, 420);
+            panelEnemy.Size = new Size(454, 454);
             panelEnemy.TabIndex = 10;
             // 
             // panelPlayer
             // 
             panelPlayer.Anchor = AnchorStyles.None;
             panelPlayer.BackColor = Color.MidnightBlue;
-            panelPlayer.Location = new Point(27, 81);
+            panelPlayer.Location = new Point(3, 81);
             panelPlayer.Name = "panelPlayer";
-            panelPlayer.Size = new Size(430, 420);
+            panelPlayer.Size = new Size(454, 454);
             panelPlayer.TabIndex = 9;
             // 
             // btnExitFromGame
@@ -79,7 +79,7 @@
             btnExitFromGame.FlatStyle = FlatStyle.Flat;
             btnExitFromGame.Font = new Font("Sitka Text", 16.1999989F, FontStyle.Bold, GraphicsUnit.Point);
             btnExitFromGame.ForeColor = Color.FromArgb(49, 56, 87);
-            btnExitFromGame.Location = new Point(507, 532);
+            btnExitFromGame.Location = new Point(505, 541);
             btnExitFromGame.Name = "btnExitFromGame";
             btnExitFromGame.Size = new Size(344, 76);
             btnExitFromGame.TabIndex = 8;
@@ -125,7 +125,7 @@
             lblGamerName.TabIndex = 2;
             lblGamerName.Text = "Ваше поле";
             // 
-            // Game
+            // GameForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -136,7 +136,7 @@
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
-            Name = "Game";
+            Name = "GameForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Игровые поля";
             panel2.ResumeLayout(false);

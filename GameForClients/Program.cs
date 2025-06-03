@@ -17,26 +17,19 @@ namespace GameForClients
             var options = new DbContextOptionsBuilder<DbForGame>()
            .UseNpgsql("User ID=postgres;Password = VOFV2fo2st;Host = localhost;Port = 5432;Database = postgres;")
            .Options;
-            
-            var dbContext = new DbForGame();
+            var dbContext = new DbForGame(options);
             var gameRepo = new GameRepository(dbContext);
             var shipRepo = new ShipRepository(dbContext);
             var moveRepo = new MoveRepository(dbContext);
-            var userRepository = new UserRepository(dbContext);
+            var userRepo = new UserRepository(dbContext);
             var gameService = new GameService(gameRepo, shipRepo, moveRepo);
-            Application.Run(new Login(dbContext, gameService, gameRepo));
+
+            Application.Run(new Login(dbContext, gameService, gameRepo, userRepo));
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-              
-        }
-        private static GameService CreateGameService(DbForGame dbContext)
-        {
-            var gameRepo = new GameRepository(dbContext);
-            var shipRepo = new ShipRepository(dbContext);
-            var moveRepo = new MoveRepository(dbContext);
-            return new GameService(gameRepo, shipRepo, moveRepo);
+
         }
     }
 }

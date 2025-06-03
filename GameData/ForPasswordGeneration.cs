@@ -1,12 +1,17 @@
 ﻿using System.Security.Cryptography;
 namespace GameData
 {
+    /// <summary>  
+    /// Для хеширования пароля и его проверки
+    /// </summary>
     public static class ForPasswordGeneration
     {
         private const int SaltSize = 16;
         private const int KeySize = 32;  
         private const int Iterations = 100_000;
-
+        /// <summary>  
+        /// Создает хеш пароля и возвращает его в нужном формате, содержащий соль+ключ
+        /// </summary>
         public static string HashPassword(string password)
         {
             using (var rng = RandomNumberGenerator.Create())
@@ -23,6 +28,9 @@ namespace GameData
                 return Convert.ToBase64String(hashBytes);
             }
         }
+        /// <summary>  
+        /// Проверяет что введенный пароль соответсвует захешированному
+        /// </summary>
 
         public static bool VerifyPassword(string password, string hashedPassword)
         {

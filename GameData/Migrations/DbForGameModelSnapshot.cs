@@ -21,7 +21,7 @@ namespace GameData.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GameForClients.Models.Game", b =>
+            modelBuilder.Entity("GameData.Models.Game", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -29,8 +29,10 @@ namespace GameData.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("EndedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int?>("Player1Id")
                         .HasColumnType("integer");
@@ -38,8 +40,11 @@ namespace GameData.Migrations
                     b.Property<int?>("Player2Id")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Waiting");
 
                     b.Property<int?>("WinnerId")
                         .HasColumnType("integer");
@@ -58,13 +63,14 @@ namespace GameData.Migrations
                         new
                         {
                             Id = 1,
+                            CreatedDate = new DateTime(2025, 6, 2, 9, 46, 39, 750, DateTimeKind.Utc).AddTicks(3830),
                             Player1Id = 1,
                             Player2Id = 2,
-                            StartedAt = new DateTime(2025, 5, 26, 8, 13, 19, 474, DateTimeKind.Utc).AddTicks(6018)
+                            Status = "Active"
                         });
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Log", b =>
+            modelBuilder.Entity("GameData.Models.Log", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -92,19 +98,19 @@ namespace GameData.Migrations
                         {
                             Id = 1,
                             Action = "User logged in",
-                            CreatedAt = new DateTime(2025, 5, 26, 7, 13, 19, 474, DateTimeKind.Utc).AddTicks(6149),
+                            CreatedAt = new DateTime(2025, 6, 2, 8, 46, 39, 750, DateTimeKind.Utc).AddTicks(3958),
                             UserId = 1
                         },
                         new
                         {
                             Id = 2,
                             Action = "User started game",
-                            CreatedAt = new DateTime(2025, 5, 26, 7, 43, 19, 474, DateTimeKind.Utc).AddTicks(6151),
+                            CreatedAt = new DateTime(2025, 6, 2, 9, 16, 39, 750, DateTimeKind.Utc).AddTicks(3959),
                             UserId = 2
                         });
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Move", b =>
+            modelBuilder.Entity("GameData.Models.Move", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -144,7 +150,7 @@ namespace GameData.Migrations
                             Id = 1,
                             GameId = 1,
                             IsHit = false,
-                            MoveTime = new DateTime(2025, 5, 26, 9, 13, 19, 474, DateTimeKind.Utc).AddTicks(6065),
+                            MoveTime = new DateTime(2025, 6, 2, 10, 46, 39, 750, DateTimeKind.Utc).AddTicks(3879),
                             PlayerId = 1,
                             X = 0,
                             Y = 0
@@ -154,14 +160,14 @@ namespace GameData.Migrations
                             Id = 2,
                             GameId = 1,
                             IsHit = true,
-                            MoveTime = new DateTime(2025, 5, 26, 10, 13, 19, 474, DateTimeKind.Utc).AddTicks(6068),
+                            MoveTime = new DateTime(2025, 6, 2, 11, 46, 39, 750, DateTimeKind.Utc).AddTicks(3881),
                             PlayerId = 2,
                             X = 1,
                             Y = 0
                         });
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Ship", b =>
+            modelBuilder.Entity("GameData.Models.Ship", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -210,7 +216,7 @@ namespace GameData.Migrations
                         });
                 });
 
-            modelBuilder.Entity("GameForClients.Models.User", b =>
+            modelBuilder.Entity("GameData.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -242,32 +248,32 @@ namespace GameData.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 5, 27, 8, 13, 19, 472, DateTimeKind.Utc).AddTicks(6104),
-                            PasswordHash = "AQAAAAEAACcQAAAAEBNzTgHxS05ue64XsPlofTKVrSrD9HDek1m1KC3mx7FkuRHcH0wKiJ17WmyLvQ+tRQ==",
+                            CreatedAt = new DateTime(2025, 6, 3, 9, 46, 39, 732, DateTimeKind.Utc).AddTicks(4490),
+                            PasswordHash = "C77rrffMKpQG5EwTPhfwvKBvxtCscyH7zq0FqyvDL1kAPJGH4BxsymNr/heJmrrt",
                             Username = "player1"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 5, 27, 8, 13, 19, 473, DateTimeKind.Utc).AddTicks(6052),
-                            PasswordHash = "AQAAAAEAACcQAAAAEKUDNokCmt34D3lmA50FdUB6/NdjcqcbjEHMlQr2pMEyeK5xg4mflO0VZjoIbfPy5w==",
+                            CreatedAt = new DateTime(2025, 6, 3, 9, 46, 39, 750, DateTimeKind.Utc).AddTicks(3697),
+                            PasswordHash = "0u+g39pK/XqgPxnAbBckc4DwOpl/IC/sKmMc3kSwlYn0ac0AZQboXZ1VfTqqDNNj",
                             Username = "player2"
                         });
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Game", b =>
+            modelBuilder.Entity("GameData.Models.Game", b =>
                 {
-                    b.HasOne("GameForClients.Models.User", "Player1")
+                    b.HasOne("GameData.Models.User", "Player1")
                         .WithMany("GamesAsPlayer1")
                         .HasForeignKey("Player1Id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("GameForClients.Models.User", "Player2")
+                    b.HasOne("GameData.Models.User", "Player2")
                         .WithMany("GamesAsPlayer2")
                         .HasForeignKey("Player2Id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("GameForClients.Models.User", "Winner")
+                    b.HasOne("GameData.Models.User", "Winner")
                         .WithMany("GamesWon")
                         .HasForeignKey("WinnerId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -279,9 +285,9 @@ namespace GameData.Migrations
                     b.Navigation("Winner");
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Log", b =>
+            modelBuilder.Entity("GameData.Models.Log", b =>
                 {
-                    b.HasOne("GameForClients.Models.User", "User")
+                    b.HasOne("GameData.Models.User", "User")
                         .WithMany("Logs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -290,15 +296,15 @@ namespace GameData.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Move", b =>
+            modelBuilder.Entity("GameData.Models.Move", b =>
                 {
-                    b.HasOne("GameForClients.Models.Game", "Game")
+                    b.HasOne("GameData.Models.Game", "Game")
                         .WithMany("Moves")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GameForClients.Models.User", "Player")
+                    b.HasOne("GameData.Models.User", "Player")
                         .WithMany("Moves")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -309,15 +315,15 @@ namespace GameData.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Ship", b =>
+            modelBuilder.Entity("GameData.Models.Ship", b =>
                 {
-                    b.HasOne("GameForClients.Models.Game", "Game")
+                    b.HasOne("GameData.Models.Game", "Game")
                         .WithMany("Ships")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GameForClients.Models.User", "Player")
+                    b.HasOne("GameData.Models.User", "Player")
                         .WithMany("Ships")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -328,14 +334,14 @@ namespace GameData.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("GameForClients.Models.Game", b =>
+            modelBuilder.Entity("GameData.Models.Game", b =>
                 {
                     b.Navigation("Moves");
 
                     b.Navigation("Ships");
                 });
 
-            modelBuilder.Entity("GameForClients.Models.User", b =>
+            modelBuilder.Entity("GameData.Models.User", b =>
                 {
                     b.Navigation("GamesAsPlayer1");
 
@@ -349,7 +355,6 @@ namespace GameData.Migrations
 
                     b.Navigation("Ships");
                 });
-#pragma warning restore 612, 618
         }
     }
 }

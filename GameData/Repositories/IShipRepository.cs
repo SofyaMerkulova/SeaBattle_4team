@@ -8,6 +8,7 @@ namespace GameData.Repositories
         Task<List<Ship>> GetByGameIdAsync(int gameId);  
         Task<Ship?> GetByIdAsync(int id);
         Task AddAsync(Ship ship);
+        Task<List<Ship>> GetByGameAndPlayerAsync(int gameId, int playerId);
         Task SaveChangesAsync();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using GameData.Datas.Configurations;
 using GameData.Models;
 using Microsoft.EntityFrameworkCore;
-using GameData;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 public class DbForGame : DbContext
 {
@@ -31,14 +31,21 @@ public class DbForGame : DbContext
         modelBuilder.ApplyConfiguration(new UserConfig());
         modelBuilder.ApplyConfiguration(new GameConfig());
 
-        var primData = new PrimaryData();
        
-        modelBuilder.ApplyConfiguration<User>(primData);
-        modelBuilder.ApplyConfiguration<Game>(primData);
-        modelBuilder.ApplyConfiguration<Move>(primData);
-        modelBuilder.ApplyConfiguration<Ship>(primData);
-        modelBuilder.ApplyConfiguration<Log>(primData);
-        base.OnModelCreating(modelBuilder);
     }
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>()
+            .HaveConversion<DateTimeToUtcConverter>();
+
+    }
+    public class DateTimeToUtcConverter : ValueConverter<DateTime, DateTime>
+    {
+        public DateTimeToUtcConverter()
+            : base(v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                  v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+        { }
+    }  
 }
+
 

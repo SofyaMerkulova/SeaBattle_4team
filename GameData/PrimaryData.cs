@@ -4,12 +4,18 @@ using GameData.Models;
 
 namespace GameData
 {
+    /// <summary>  
+    /// Класс для заполнения бд данными (вторая миграция)
+    /// </summary>  
     public class PrimaryData : IEntityTypeConfiguration<User>,
                                IEntityTypeConfiguration<Game>,
                                IEntityTypeConfiguration<Move>,
                                IEntityTypeConfiguration<Ship>,
                                IEntityTypeConfiguration<Log>
     {
+        /// <summary>  
+        /// Добавление пользователей в бд при миграции
+        /// </summary>  
         public void Configure(EntityTypeBuilder<User> userBuilder)
         {
            
@@ -30,8 +36,10 @@ namespace GameData
             };
             userBuilder.HasData(user1, user2);
         }
-          
 
+        /// <summary>  
+        /// Добавление игр при миграции в бд
+        /// </summary>  
         public void Configure(EntityTypeBuilder<Game> gameBuilder)
         {
             gameBuilder.HasData(
@@ -40,12 +48,15 @@ namespace GameData
                     Id = 1,
                     Player1Id = 1,
                     Player2Id = 2,
-                    StartedAt = DateTime.UtcNow.AddDays(-1),
-                    EndedAt = null,
+                    Status = "Active",
+                    CreatedDate = DateTime.UtcNow.AddDays(-1),
                     WinnerId = null
                 }
             );
         }
+        /// <summary>  
+        /// Добавление ходов при миграции в бд
+        /// </summary>  
 
         public void Configure(EntityTypeBuilder<Move> moveBuilder)
         {
@@ -72,7 +83,9 @@ namespace GameData
                 }
             );
         }
-
+        /// <summary>  
+        /// Добавление кораблей при миграции в бд
+        /// </summary>  
         public void Configure(EntityTypeBuilder<Ship> shipBuilder)
         {
             shipBuilder.HasData(
@@ -94,7 +107,9 @@ namespace GameData
                 }
             );
         }
-
+        /// <summary>  
+        /// Добавление логов при миграции в бд
+        /// </summary>  
         public void Configure(EntityTypeBuilder<Log> logBuilder)
         {
             logBuilder.HasData(

@@ -8,6 +8,7 @@ namespace GameData.Repositories
         Task<Game> GetByIdAsync(int id);
         Task AddAsync(Game game);
         Task SaveAsync();
+        Task<Game> GetActiveGameAsync();
     }
 
 }

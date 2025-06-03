@@ -31,21 +31,38 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
             panel1 = new Panel();
+            btnForJoinGame = new Button();
             btnFor = new Button();
-            btnForStars = new Button();
+            btnForStart = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(100, 180, 220, 250);
+            panel1.Controls.Add(btnForJoinGame);
             panel1.Controls.Add(btnFor);
-            panel1.Controls.Add(btnForStars);
+            panel1.Controls.Add(btnForStart);
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(1188, 631);
             panel1.TabIndex = 0;
+            // 
+            // btnForJoinGame
+            // 
+            btnForJoinGame.BackColor = Color.FromArgb(233, 243, 255);
+            btnForJoinGame.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
+            btnForJoinGame.FlatStyle = FlatStyle.Flat;
+            btnForJoinGame.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
+            btnForJoinGame.ForeColor = Color.FromArgb(155, 194, 216);
+            btnForJoinGame.Location = new Point(354, 276);
+            btnForJoinGame.Name = "btnForJoinGame";
+            btnForJoinGame.Size = new Size(450, 100);
+            btnForJoinGame.TabIndex = 9;
+            btnForJoinGame.Text = "Присоединиться";
+            btnForJoinGame.UseVisualStyleBackColor = false;
+            btnForJoinGame.Click += btnForJoinGame_Click_1;
             // 
             // btnFor
             // 
@@ -54,27 +71,28 @@
             btnFor.FlatStyle = FlatStyle.Flat;
             btnFor.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             btnFor.ForeColor = Color.FromArgb(155, 194, 216);
-            btnFor.Location = new Point(354, 319);
+            btnFor.Location = new Point(354, 419);
             btnFor.Name = "btnFor";
             btnFor.Size = new Size(450, 92);
             btnFor.TabIndex = 8;
             btnFor.Text = "Выход";
             btnFor.UseVisualStyleBackColor = false;
+            btnFor.Click += btnFor_Click;
             // 
-            // btnForStars
+            // btnForStart
             // 
-            btnForStars.BackColor = Color.FromArgb(233, 243, 255);
-            btnForStars.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
-            btnForStars.FlatStyle = FlatStyle.Flat;
-            btnForStars.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
-            btnForStars.ForeColor = Color.FromArgb(155, 194, 216);
-            btnForStars.Location = new Point(354, 154);
-            btnForStars.Name = "btnForStars";
-            btnForStars.Size = new Size(450, 89);
-            btnForStars.TabIndex = 7;
-            btnForStars.Text = "Начать игру";
-            btnForStars.UseVisualStyleBackColor = false;
-     
+            btnForStart.BackColor = Color.FromArgb(233, 243, 255);
+            btnForStart.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
+            btnForStart.FlatStyle = FlatStyle.Flat;
+            btnForStart.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
+            btnForStart.ForeColor = Color.FromArgb(155, 194, 216);
+            btnForStart.Location = new Point(354, 154);
+            btnForStart.Name = "btnForStart";
+            btnForStart.Size = new Size(450, 89);
+            btnForStart.TabIndex = 7;
+            btnForStart.Text = "Начать игру";
+            btnForStart.UseVisualStyleBackColor = false;
+            btnForStart.Click += btnForStart_Click;
             // 
             // Menu
             // 
@@ -86,7 +104,7 @@
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            MinimizeBox = false;
+            MaximizeBox = false;
             Name = "Menu";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Меню";
@@ -97,7 +115,8 @@
         #endregion
 
         private Panel panel1;
-        private Button btnForStars;
+        private Button btnForStart;
         private Button btnFor;
+        private Button btnForJoinGame;
     }
 }

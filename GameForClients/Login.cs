@@ -5,23 +5,30 @@ using GameForClients.Servies;
 using Microsoft.EntityFrameworkCore;
 namespace GameForClients
 {
+    /// <summary>  
+    /// ‘орма регистрации и входа, логика дл€ кнопок и полей
+    /// </summary>
     public partial class Login : Form
     {
         private readonly GameService _gameService;
+        private readonly IUserRepository _userRepository;
         private readonly DbForGame _dbContext;
         private readonly IGameRepository _gameRepository;
-        public Login(DbForGame dbContext, GameService gameService, IGameRepository gameRepository)
+        private static int _currentGameId = 0;
+        private static int _playersLoggedIn = 0;
+        private static List<int> _playerIds = new List<int>();
+        public Login(DbForGame dbContext, GameService gameService,
+            IGameRepository gameRepository, IUserRepository userRepository)
         {
             _dbContext = dbContext;
             _gameService = gameService;
             _gameRepository = gameRepository;
+            _userRepository = userRepository; 
             InitializeComponent();
-            _dbContext = new DbForGame();
             txtForPassword.PasswordChar = 'Х';
             checkPassword.CheckedChanged += (s, e) =>
                 txtForPassword.PasswordChar = checkPassword.Checked ? '\0' : 'Х';
 
-            // ќбработчики кнопок (подписываемс€)
             btnForEnter.Click += async (s, e) => await BtnForEnter_Click(s, e);
             btnForRegistration.Click += async (s, e) => await BtnForRegistration_Click(s, e);
         }
@@ -32,31 +39,44 @@ namespace GameForClients
         }
         private async Task BtnForEnter_Click(object sender, EventArgs e)
         {
-            string login = txtForLogin.Text.Trim();
-            string password = txtForPassword.Text;
+            var user = await AuthenticateUser(txtForLogin.Text, txtForPassword.Text);
+            if (user == null) return;
 
-            if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
+            var activeGame = await _gameRepository.GetActiveGameAsync();
+
+            if (activeGame == null)
             {
-                MessageBox.Show("¬ведите логин и пароль", "ќшибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                
+                var gameId = await _gameService.CreateGame(user.Id);
+                var menuForm = new Menu(_gameService, _gameRepository, user.Id);
+                menuForm.Show();
+                this.Hide();
             }
-            var user = await _dbContext.Users
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(u => u.Username == login);
+            else
+            {
+                if (await _gameService.JoinGame(activeGame.Id, user.Id))
+                {
+                    var menuForm = new Menu(_gameService, _gameRepository, user.Id);
+                    menuForm.Show();
+                    this.Hide();
+                }
+            }
+        }
+        private async Task<User> AuthenticateUser(string login, string password)
+        {
+            using var context = new DbForGame();
+            var user = await context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Username == login);
 
             if (user == null || !VerifyPassword(password, user.PasswordHash))
             {
                 MessageBox.Show("Ќеверный логин или пароль");
-                return;
+                return null;
             }
 
-            MessageBox.Show("¬ход выполнен успешно!");
-            var menuForm = new Menu(_gameService, _gameRepository, user.Id);
-            menuForm.Show();
-            this.Hide();
+            return user;
         }
-
         private async Task BtnForRegistration_Click(object sender, EventArgs e)
         {
             string login = txtForLogin.Text.Trim();

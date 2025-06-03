@@ -4,25 +4,32 @@ using GameForClients.Servies;
 
 namespace GameForClients
 {
+    /// <summary>  
+    /// Форма игры и логика для панелей и кнопок
+    /// </summary>
     public partial class GameForm : Form
     {
+        private readonly IMoveRepository moveRepository;
         private readonly IGameRepository _gameRepo;
         private bool _isWaitingForOpponent;
         private readonly GameService _gameService;
         private readonly IShipRepository _shipRepo;
-        private readonly int _currentPlayerId; // Правильное имя поля
+        private readonly int _currentPlayerId;
         private int _currentGameId;
         private List<Ship> _playerShips = new List<Ship>();
         private List<ForCounterShips> _enemyShips = new List<ForCounterShips>();
         private HashSet<Point> _enemyHits = new HashSet<Point>();
+        private System.Windows.Forms.Timer _syncTimer;
+
 
         private enum GamePhase { Placement, Battle }
         private GamePhase _currentPhase = GamePhase.Placement;
 
-        public GameForm(GameService gameService, IGameRepository gameRepo, int playerId, int? existingGameId = null)
+        public GameForm(GameService gameService, IGameRepository gameRepo, IMoveRepository moveRepository, int playerId, int? existingGameId = null)
         {
+            this.moveRepository = moveRepository;
             _gameService = gameService;
-            _currentPlayerId = playerId; 
+            _currentPlayerId = playerId;
             _gameRepo = gameRepo;
             _shipRepo = new ShipRepository(new DbForGame());
             InitializeComponent();
@@ -32,14 +39,13 @@ namespace GameForClients
         {
             _currentPhase = GamePhase.Placement;
             this.Text = "Расстановка кораблей";
-            MessageBox.Show("Расставьте свои корабли на левом поле");
 
-            // Активируем только свою доску
+
             foreach (Control c in panelPlayer.Controls)
             {
                 if (c is Button btn)
                 {
-                    btn.Click -= PlaceShip_Click; // Удаляем старые обработчики
+                    btn.Click -= PlaceShip_Click;
                     btn.Click += PlaceShip_Click;
                     btn.BackColor = Color.MidnightBlue;
                     btn.Enabled = true;
@@ -58,7 +64,6 @@ namespace GameForClients
             {
                 if (existingGameId.HasValue)
                 {
-                    // Режим присоединения к существующей игре
                     _currentGameId = existingGameId.Value;
                     if (!await _gameService.JoinGame(_currentGameId, _currentPlayerId))
                     {
@@ -67,11 +72,9 @@ namespace GameForClients
                         return;
                     }
 
-                    // Загружаем свои корабли
                     _playerShips = (await _shipRepo.GetByGameIdAsync(_currentGameId))
                         .Where(s => s.PlayerId == _currentPlayerId).ToList();
 
-                    // Если кораблей нет - значит нужно расставить
                     if (_playerShips.Count == 0)
                     {
                         CreateGameBoards();
@@ -80,7 +83,6 @@ namespace GameForClients
                     }
                     else
                     {
-                        // Если корабли уже есть - сразу начинаем бой
                         CreateGameBoards();
                         _currentPhase = GamePhase.Battle;
                         MessageBox.Show("Все корабли расставлены! Начинаем бой.");
@@ -89,7 +91,6 @@ namespace GameForClients
                 }
                 else
                 {
-                    // Режим создания новой игры
                     _currentGameId = await _gameService.CreateGame(_currentPlayerId);
                     _playerShips = new List<Ship>();
 
@@ -97,11 +98,13 @@ namespace GameForClients
                     MessageBox.Show("Расставьте свои корабли на левом поле");
                     SetupShipPlacement();
 
-                    // Для multiplayer: ожидание второго игрока
                     _isWaitingForOpponent = true;
                     MessageBox.Show("Ожидаем второго игрока...");
                     StartOpponentWaitingTimer();
                 }
+                _syncTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+                _syncTimer.Tick += SyncGameState;
+                _syncTimer.Start();
             }
             catch (Exception ex)
             {
@@ -109,7 +112,25 @@ namespace GameForClients
                 this.Close();
             }
         }
+      
+        private async void SyncGameState(object sender, EventArgs e)
+        {
+            var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
+            var enemyMoves = allMoves.Where(m => m.PlayerId != _currentPlayerId);
 
+            foreach (var move in enemyMoves)
+            {
+                var btn = panelPlayer.Controls
+                    .OfType<Button>()
+                    .FirstOrDefault(b => ((Point)b.Tag).X == move.X &&
+                                       ((Point)b.Tag).Y == move.Y);
+
+                if (btn != null)
+                {
+                    btn.BackColor = move.IsHit ? Color.Red : Color.White;
+                }
+            }
+        }
         private void StartOpponentWaitingTimer()
         {
             var timer = new System.Windows.Forms.Timer { Interval = 1000 };
@@ -120,16 +141,13 @@ namespace GameForClients
                 {
                     timer.Stop();
                     _isWaitingForOpponent = false;
-
-                    // Проверяем, нужно ли нам расставлять корабли
                     if (_playerShips.Count == 0)
                     {
-                        MessageBox.Show("Расставьте свои корабли");
                         MessageBox.Show("Второй игрок подключился! Расставьте корабли.");
                     }
                     else
                     {
-                        // Если корабли уже расставлены - начинаем бой
+
                         _currentPhase = GamePhase.Battle;
                         EnableBattleMode();
                         MessageBox.Show("Второй игрок подключился! Начинаем бой.");
@@ -150,7 +168,6 @@ namespace GameForClients
             panel.Controls.Clear();
             int cellSize = 30;
 
-            // Буквы (A-К)
             for (int col = 0; col < 10; col++)
             {
                 var label = new Label
@@ -163,8 +180,6 @@ namespace GameForClients
                 };
                 panel.Controls.Add(label);
             }
-
-            // Цифры (1-10)
             for (int row = 0; row < 10; row++)
             {
                 var label = new Label
@@ -177,8 +192,6 @@ namespace GameForClients
                 };
                 panel.Controls.Add(label);
             }
-
-            // Игровое поле
             for (int row = 0; row < 10; row++)
             {
                 for (int col = 0; col < 10; col++)
@@ -196,16 +209,17 @@ namespace GameForClients
                     {
                         btn.Click += PlaceShip_Click;
                     }
-                    else if (isEnemy && _currentPhase == GamePhase.Battle)
+                    else if (isEnemy)
                     {
-                        btn.Click += AttackEnemy_Click;
+                        btn.Click -= AttackEnemy_Click;
+                        if (_currentPhase == GamePhase.Battle)
+                            btn.Click += AttackEnemy_Click;
                     }
 
                     panel.Controls.Add(btn);
                 }
             }
         }
-
         private async void PlaceShip_Click(object sender, EventArgs e)
         {
             var btn = (Button)sender;
@@ -229,9 +243,9 @@ namespace GameForClients
             await _shipRepo.SaveChangesAsync();
 
             _playerShips.Add(ship);
-            btn.BackColor = Color.White; // Отмечаем корабль серым цветом
+            btn.BackColor = Color.White;
 
-            if (_playerShips.Count >= 20) // После размещения всех кораблей
+            if (_playerShips.Count >= 20)
             {
                 _currentPhase = GamePhase.Battle;
                 MessageBox.Show("Все корабли размещены! Начинаем бой.");
@@ -241,6 +255,10 @@ namespace GameForClients
 
         private void EnableBattleMode()
         {
+            _currentPhase = GamePhase.Battle;
+
+            CreateBoard(panelEnemy, true);
+
             foreach (Control c in panelPlayer.Controls)
                 if (c is Button btn) btn.Enabled = false;
 
@@ -250,50 +268,43 @@ namespace GameForClients
 
         private async void AttackEnemy_Click(object sender, EventArgs e)
         {
+            var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
+            int myMoves = allMoves.Count(m => m.PlayerId == _currentPlayerId);
+            int enemyMoves = allMoves.Count(m => m.PlayerId != _currentPlayerId);
+            if (myMoves > enemyMoves)
+            {
+                MessageBox.Show("Ожидайте хода противника!");
+                return;
+            }
+
             var btn = (Button)sender;
             var pos = (Point)btn.Tag;
 
+            if (await moveRepository.WasHit(_currentGameId, pos.X, pos.Y))
+            {
+                MessageBox.Show("Вы уже стреляли в эту клетку!");
+                return;
+            }
             bool isHit = await _gameService.MakeMove(_currentGameId, _currentPlayerId, pos.X, pos.Y);
-
             btn.BackColor = isHit ? Color.Red : Color.White;
             btn.Enabled = false;
 
-            if (isHit)
-                MessageBox.Show("Попадание!");
-            else
-                MessageBox.Show("Мимо!");
-
-            if (await CheckGameEnd())
+            if (await _gameService.IsGameOver(_currentGameId, _currentPlayerId))
             {
+                _syncTimer.Stop();
                 MessageBox.Show("Вы победили!");
                 this.Close();
             }
         }
-
-        private async Task<bool> CheckGameEnd()
+        protected override void OnShown(EventArgs e)
         {
-            var enemyShips = (await _shipRepo.GetByGameIdAsync(_currentGameId))
-                .Where(s => s.PlayerId != _currentPlayerId);
-
-            foreach (var ship in enemyShips)
-            {
-                foreach (var cell in ship.Cells.Split(';'))
-                {
-                    var coords = cell.Split(',');
-                    if (coords.Length != 2) continue;
-
-                    int x = int.Parse(coords[0]);
-                    int y = int.Parse(coords[1]);
-
-                    if (!await _gameService.WasHit(_currentGameId, x, y))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            base.OnShown(e);
+            this.Text = $"Морской бой (Игрок {_currentPlayerId})";
         }
 
-       
+        private void btnExitFromGame_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }

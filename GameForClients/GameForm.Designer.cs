@@ -85,6 +85,7 @@
             btnExitFromGame.TabIndex = 8;
             btnExitFromGame.Text = "Выйти из игры";
             btnExitFromGame.UseVisualStyleBackColor = false;
+            btnExitFromGame.Click += btnExitFromGame_Click;
             // 
             // btnForEnd
             // 

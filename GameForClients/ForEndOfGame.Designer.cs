@@ -30,9 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ForEndOfGame));
             panel1 = new Panel();
+            lblGameName = new Label();
             btnForAgainStartGame = new Button();
             btnForEndGame = new Button();
-            lblGameName = new Label();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -48,6 +48,19 @@
             panel1.Size = new Size(1188, 631);
             panel1.TabIndex = 1;
             // 
+            // lblGameName
+            // 
+            lblGameName.AutoSize = true;
+            lblGameName.BackColor = Color.White;
+            lblGameName.Font = new Font("Sitka Text", 48F, FontStyle.Bold, GraphicsUnit.Point);
+            lblGameName.ForeColor = Color.FromArgb(49, 56, 87);
+            lblGameName.Location = new Point(265, 130);
+            lblGameName.Name = "lblGameName";
+            lblGameName.Size = new Size(694, 116);
+            lblGameName.TabIndex = 9;
+            lblGameName.Text = "Результат игры";
+            lblGameName.Click += lblGameName_Click;
+            // 
             // btnForAgainStartGame
             // 
             btnForAgainStartGame.BackColor = Color.FromArgb(78, 124, 178);
@@ -61,6 +74,7 @@
             btnForAgainStartGame.TabIndex = 8;
             btnForAgainStartGame.Text = "Сыграть повторно";
             btnForAgainStartGame.UseVisualStyleBackColor = false;
+            btnForAgainStartGame.Click += btnForAgainStartGame_Click;
             // 
             // btnForEndGame
             // 
@@ -75,18 +89,7 @@
             btnForEndGame.TabIndex = 7;
             btnForEndGame.Text = "Завершить игру";
             btnForEndGame.UseVisualStyleBackColor = false;
-            // 
-            // lblGameName
-            // 
-            lblGameName.AutoSize = true;
-            lblGameName.BackColor = Color.White;
-            lblGameName.Font = new Font("Sitka Text", 48F, FontStyle.Bold, GraphicsUnit.Point);
-            lblGameName.ForeColor = Color.FromArgb(49, 56, 87);
-            lblGameName.Location = new Point(265, 130);
-            lblGameName.Name = "lblGameName";
-            lblGameName.Size = new Size(694, 116);
-            lblGameName.TabIndex = 9;
-            lblGameName.Text = "Результат игры";
+            btnForEndGame.Click += btnForEndGame_Click;
             // 
             // ForEndOfGame
             // 
@@ -97,6 +100,7 @@
             ClientSize = new Size(1188, 631);
             Controls.Add(panel1);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
             Name = "ForEndOfGame";
             Text = "Итоги игры";
             panel1.ResumeLayout(false);

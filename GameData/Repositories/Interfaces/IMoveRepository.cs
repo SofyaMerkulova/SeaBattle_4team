@@ -2,6 +2,9 @@
 
 namespace GameData.Repositories.Interfaces
 {
+    /// <summary>
+    /// Интерфейс для репозитория ходов
+    /// </summary>
     public interface IMoveRepository
     {
         Task<Move> GetByIdAsync(Guid id);

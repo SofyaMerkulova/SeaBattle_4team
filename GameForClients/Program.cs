@@ -1,15 +1,21 @@
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
 using GameData.Repositories;
 using GameData.Repositories.Interfaces;
 using GameForClients.Servies;
 using GameForClients.Servies.InferfacesForServ;
 using Microsoft.EntityFrameworkCore;
-using Castle.Windsor;
-using Castle.Windsor.Diagnostics.Extensions;
-using Castle.MicroKernel.Registration;
+using System.Globalization;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using LogLevel = NLog.LogLevel;
+
 namespace GameForClients
 {
     internal static class Program
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -17,6 +23,19 @@ namespace GameForClients
         static void Main()
         {
 
+            var config = new LoggingConfiguration();
+            var logfile = new FileTarget("logfile")
+            {
+                FileName = "GameForClients/logSB.log",
+
+                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${exception:format=ToString}"
+
+            };
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logfile);
+
+            LogManager.Configuration = config;
+            Logger.Info("Приложение запущено");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-RU");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var container = new WindsorContainer();

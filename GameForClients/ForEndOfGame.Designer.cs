@@ -38,71 +38,48 @@
             // 
             // panel1
             // 
+            resources.ApplyResources(panel1, "panel1");
             panel1.BackColor = Color.FromArgb(100, 180, 220, 250);
             panel1.Controls.Add(lblGameName);
             panel1.Controls.Add(btnForAgainStartGame);
             panel1.Controls.Add(btnForEndGame);
-            panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1188, 631);
-            panel1.TabIndex = 1;
             // 
             // lblGameName
             // 
-            lblGameName.AutoSize = true;
+            resources.ApplyResources(lblGameName, "lblGameName");
             lblGameName.BackColor = Color.White;
-            lblGameName.Font = new Font("Sitka Text", 48F, FontStyle.Bold, GraphicsUnit.Point);
             lblGameName.ForeColor = Color.FromArgb(49, 56, 87);
-            lblGameName.Location = new Point(265, 130);
             lblGameName.Name = "lblGameName";
-            lblGameName.Size = new Size(694, 116);
-            lblGameName.TabIndex = 9;
-            lblGameName.Text = "Результат игры";
+            
             // 
             // btnForAgainStartGame
             // 
+            resources.ApplyResources(btnForAgainStartGame, "btnForAgainStartGame");
             btnForAgainStartGame.BackColor = Color.FromArgb(78, 124, 178);
             btnForAgainStartGame.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
-            btnForAgainStartGame.FlatStyle = FlatStyle.Flat;
-            btnForAgainStartGame.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             btnForAgainStartGame.ForeColor = Color.White;
-            btnForAgainStartGame.Location = new Point(354, 478);
             btnForAgainStartGame.Name = "btnForAgainStartGame";
-            btnForAgainStartGame.Size = new Size(450, 92);
-            btnForAgainStartGame.TabIndex = 8;
-            btnForAgainStartGame.Text = "Сыграть повторно";
             btnForAgainStartGame.UseVisualStyleBackColor = false;
             btnForAgainStartGame.Click += btnForAgainStartGame_Click;
             // 
             // btnForEndGame
             // 
+            resources.ApplyResources(btnForEndGame, "btnForEndGame");
             btnForEndGame.BackColor = Color.FromArgb(78, 124, 178);
             btnForEndGame.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
-            btnForEndGame.FlatStyle = FlatStyle.Flat;
-            btnForEndGame.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             btnForEndGame.ForeColor = Color.White;
-            btnForEndGame.Location = new Point(354, 336);
             btnForEndGame.Name = "btnForEndGame";
-            btnForEndGame.Size = new Size(450, 89);
-            btnForEndGame.TabIndex = 7;
-            btnForEndGame.Text = "Завершить игру";
             btnForEndGame.UseVisualStyleBackColor = false;
             btnForEndGame.Click += btnForEndGame_Click;
             // 
             // ForEndOfGame
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
-            BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(1188, 631);
             Controls.Add(panel1);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "ForEndOfGame";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Итоги игры";
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ResumeLayout(false);

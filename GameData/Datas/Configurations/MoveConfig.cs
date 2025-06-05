@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GameData.Datas.Configurations
 {
+    /// <summary>
+    /// Конфигурация ходов
+    /// </summary>
     public class MoveConfig :IEntityTypeConfiguration<Move>
     {
         public void Configure(EntityTypeBuilder<Move> builder)

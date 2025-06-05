@@ -2,7 +2,9 @@
 using GameData.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
+/// <summary>
+/// Контекст базы данных для сущностей
+/// </summary>
 public class DbForGame : DbContext
 {
     public DbForGame() { }
@@ -37,6 +39,9 @@ public class DbForGame : DbContext
             .HaveConversion<DateTimeToUtcConverter>();
 
     }
+    /// <summary>
+    /// Конвертирование в нужный формат даты
+    /// </summary>
     public class DateTimeToUtcConverter : ValueConverter<DateTime, DateTime>
     {
         public DateTimeToUtcConverter()

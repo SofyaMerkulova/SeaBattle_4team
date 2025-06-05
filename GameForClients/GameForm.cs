@@ -2,6 +2,7 @@
 using GameData.Repositories;
 using GameData.Repositories.Interfaces;
 using GameForClients.Servies.InferfacesForServ;
+using NLog;
 
 namespace GameForClients
 {
@@ -10,6 +11,8 @@ namespace GameForClients
     /// </summary>
     public partial class GameForm : Form
     {
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly IMoveRepository moveRepository;
         private readonly IGameRepository _gameRepo;
@@ -21,10 +24,9 @@ namespace GameForClients
         private readonly Guid _currentPlayerId;
         private Guid _currentGameId;
         private List<Ship> _playerShips = new List<Ship>();
-
         private HashSet<Point> _enemyHits = new HashSet<Point>();
-        private readonly bool _isWinner;
         private bool _isSyncInProgress = false;
+
         private enum GamePhase { Placement, Battle }
         private GamePhase _currentPhase = GamePhase.Placement;
 
@@ -35,14 +37,17 @@ namespace GameForClients
             _currentPlayerId = playerId;
             _gameRepo = gameRepo;
             _shipRepo = new ShipRepository(new DbForGame());
+
             InitializeComponent();
             InitializeGameAsync(existingGameId);
             btnCopyId.Click += btnCopyId_Click;
+
             gameSyncTimer = new System.Windows.Forms.Timer();
             gameSyncTimer.Interval = 1500;
             gameSyncTimer.Tick += SyncGameState;
             gameSyncTimer.Start();
         }
+
         private void SetupShipPlacement()
         {
             _currentPhase = GamePhase.Placement;
@@ -63,17 +68,18 @@ namespace GameForClients
             }
         }
 
-
         private async void InitializeGameAsync(Guid? existingGameId = null)
         {
             try
             {
+                logger.Info("Инициализация игры. Игрок: {0}, GameId: {1}", _currentPlayerId, existingGameId?.ToString() ?? "новая");
+
                 if (existingGameId.HasValue)
                 {
                     _currentGameId = existingGameId.Value;
                     if (!await _gameService.JoinGame(_currentGameId, _currentPlayerId))
                     {
-                        MessageBox.Show("Не удалось присоединиться к игре");
+                        MessageBox.Show("");
                         this.Close();
                         return;
                     }
@@ -81,17 +87,17 @@ namespace GameForClients
                     _playerShips = (await _shipRepo.GetByGameIdAsync(_currentGameId))
                         .Where(s => s.PlayerId == _currentPlayerId).ToList();
 
+                    CreateGameBoards();
+
                     if (_playerShips.Count == 0)
                     {
-                        CreateGameBoards();
-                        MessageBox.Show("Расставьте свои корабли на левом поле");
+                        MessageBox.Show("Расставьте свои корабли");
                         SetupShipPlacement();
                     }
                     else
                     {
-                        CreateGameBoards();
                         _currentPhase = GamePhase.Battle;
-                        MessageBox.Show("Все корабли расставлены! Начинаем бой.");
+                        MessageBox.Show("Все корабли размещены!");
                         EnableBattleMode();
                     }
                 }
@@ -103,16 +109,14 @@ namespace GameForClients
                     MessageBox.Show($"Ваш ID игры: {_currentGameId}\n Дайте его второму игроку.");
                     SetupShipPlacement();
                     _isWaitingForOpponent = true;
-
                 }
-
             }
             catch (Exception ex)
             {
+                logger.Error(ex, "Ошибка при инициализации игры.");
                 MessageBox.Show($"Ошибка инициализации: {ex.Message}");
                 this.Close();
             }
-
         }
 
         private async void SyncGameState(object sender, EventArgs e)
@@ -122,26 +126,21 @@ namespace GameForClients
 
             try
             {
+                logger.Debug("Синхронизация состояния игры. GameId: {0}", _currentGameId);
+
                 var game = await _gameRepo.GetByIdAsync(_currentGameId);
 
                 if (game.WinnerId != null)
                 {
+                    logger.Info("Игра завершена. Победитель: {0}", game.WinnerId);
                     gameSyncTimer.Stop();
 
-                    if (game.WinnerId == _currentPlayerId)
-                    {
-                        var endForm = new ForEndOfGame(true); // победа
-                        endForm.ShowDialog();
-                    }
-                    else
-                    {
-                        var endForm = new ForEndOfGame(false); // поражение
-                        endForm.ShowDialog();
-                    }
-
+                    var endForm = new ForEndOfGame(game.WinnerId == _currentPlayerId);
+                    endForm.ShowDialog();
                     this.Close();
                     return;
                 }
+
                 var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
                 var enemyMoves = allMoves.Where(m => m.PlayerId != _currentPlayerId);
 
@@ -155,9 +154,7 @@ namespace GameForClients
                         bool isHit = _playerShips.Any(s => s.Cells.Split(';')
                             .Contains($"{move.X},{move.Y}"));
 
-                        btn.BackgroundImage = isHit
-                            ? Properties.Resources.hit
-                            : Properties.Resources.miss;
+                        btn.BackgroundImage = isHit ? Properties.Resources.hit : Properties.Resources.miss;
                         btn.BackgroundImageLayout = ImageLayout.Stretch;
 
                         if (isHit) _enemyHits.Add(new Point(move.X, move.Y));
@@ -166,9 +163,7 @@ namespace GameForClients
 
                 UpdateShipsCounter();
 
-                var myMoves = allMoves
-                    .Where(m => m.PlayerId == _currentPlayerId)
-                    .ToList();
+                var myMoves = allMoves.Where(m => m.PlayerId == _currentPlayerId).ToList();
 
                 foreach (var move in myMoves)
                 {
@@ -177,9 +172,7 @@ namespace GameForClients
 
                     if (btn != null)
                     {
-                        btn.BackgroundImage = move.IsHit
-                            ? Properties.Resources.hit
-                            : Properties.Resources.miss;
+                        btn.BackgroundImage = move.IsHit ? Properties.Resources.hit : Properties.Resources.miss;
                         btn.BackgroundImageLayout = ImageLayout.Stretch;
                         btn.Enabled = false;
                     }
@@ -187,13 +180,14 @@ namespace GameForClients
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка синхронизации: {ex.Message}");
+                logger.Error(ex, "Ошибка при синхронизации состояния игры.");
             }
             finally
             {
                 _isSyncInProgress = false;
             }
         }
+
         private void CreateGameBoards()
         {
             CreateBoard(panelPlayer, false);
@@ -207,30 +201,27 @@ namespace GameForClients
 
             for (int col = 0; col < 10; col++)
             {
-                var label = new Label
+                panel.Controls.Add(new Label
                 {
                     Text = ((char)('А' + col)).ToString(),
                     Size = new Size(cellSize, cellSize),
                     Location = new Point((col + 1) * cellSize, 0),
                     TextAlign = ContentAlignment.MiddleCenter,
                     ForeColor = Color.White
-                };
-                panel.Controls.Add(label);
+                });
             }
+
             for (int row = 0; row < 10; row++)
             {
-                var label = new Label
+                panel.Controls.Add(new Label
                 {
                     Text = (row + 1).ToString(),
                     Size = new Size(cellSize, cellSize),
                     Location = new Point(0, (row + 1) * cellSize),
                     TextAlign = ContentAlignment.MiddleCenter,
                     ForeColor = Color.White
-                };
-                panel.Controls.Add(label);
-            }
-            for (int row = 0; row < 10; row++)
-            {
+                });
+
                 for (int col = 0; col < 10; col++)
                 {
                     var btn = new Button
@@ -243,20 +234,15 @@ namespace GameForClients
                     };
 
                     if (!isEnemy && _currentPhase == GamePhase.Placement)
-                    {
                         btn.Click += PlaceShip_Click;
-                    }
-                    else if (isEnemy)
-                    {
-                        btn.Click -= AttackEnemy_Click;
-                        if (_currentPhase == GamePhase.Battle)
-                            btn.Click += AttackEnemy_Click;
-                    }
+                    else if (isEnemy && _currentPhase == GamePhase.Battle)
+                        btn.Click += AttackEnemy_Click;
 
                     panel.Controls.Add(btn);
                 }
             }
         }
+
         private void UpdateShipsCounter()
         {
             int aliveCells = 0;
@@ -271,9 +257,8 @@ namespace GameForClients
                         aliveCells++;
                 }
             }
-
-
         }
+
         private async void PlaceShip_Click(object sender, EventArgs e)
         {
             var btn = (Button)sender;
@@ -281,6 +266,7 @@ namespace GameForClients
 
             if (_playerShips.Any(s => s.Cells.Contains($"{pos.X},{pos.Y}")))
             {
+                logger.Warn("Попытка разместить корабль в занятой клетке", pos.X, pos.Y);
                 MessageBox.Show("Здесь уже есть корабль!");
                 return;
             }
@@ -296,6 +282,8 @@ namespace GameForClients
             await _shipRepo.AddAsync(ship);
             await _shipRepo.SaveChangesAsync();
 
+            logger.Info("Корабль размещен ", _currentPlayerId, pos.X, pos.Y);
+
             _playerShips.Add(ship);
             btn.BackColor = Color.White;
 
@@ -310,7 +298,6 @@ namespace GameForClients
         private void EnableBattleMode()
         {
             _currentPhase = GamePhase.Battle;
-
             CreateBoard(panelEnemy, true);
 
             foreach (Control c in panelPlayer.Controls)
@@ -322,27 +309,31 @@ namespace GameForClients
 
         private async void AttackEnemy_Click(object sender, EventArgs e)
         {
+            var btn = (Button)sender;
+            var pos = (Point)btn.Tag;
+
+            logger.Info("Игрок атакует позицию)", _currentPlayerId, pos.X, pos.Y);
+
             var game = await _gameRepo.GetByIdAsync(_currentGameId);
 
             if (game.WinnerId != null && game.WinnerId != _currentPlayerId)
             {
+                logger.Warn("Игрок попытался стрелять в завершённой игре");
                 MessageBox.Show("Вы проиграли. Игра уже завершена!");
-                var endForm = new ForEndOfGame(false);
                 this.Close();
                 return;
             }
+
             if (game.WinnerId == _currentPlayerId)
             {
                 MessageBox.Show("Вы уже победили!");
                 return;
             }
 
-            var btn = (Button)sender;
-            var pos = (Point)btn.Tag;
-
             if ((await moveRepository.GetByGameIdAsync(_currentGameId))
                 .Any(m => m.PlayerId == _currentPlayerId && m.X == pos.X && m.Y == pos.Y))
             {
+                logger.Warn("Повторный выстрел", pos.X, pos.Y, _currentPlayerId);
                 MessageBox.Show("Вы уже стреляли в эту клетку!");
                 return;
             }
@@ -351,11 +342,12 @@ namespace GameForClients
             btn.BackgroundImage = isHit ? Properties.Resources.hit : Properties.Resources.miss;
             btn.BackgroundImageLayout = ImageLayout.Stretch;
             btn.Enabled = false;
+
             if (await _gameService.IsGameOver(_currentGameId, _currentPlayerId))
             {
+                logger.Info("Игрок {0} победил в игре {1}", _currentPlayerId, _currentGameId);
                 await _gameService.SetWinner(_currentGameId, _currentPlayerId);
-
-                var endForm = new ForEndOfGame(true); // победитель
+                var endForm = new ForEndOfGame(true);
                 endForm.ShowDialog();
                 this.Close();
             }
@@ -364,9 +356,9 @@ namespace GameForClients
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-
             this.Text = $"Морской бой (ID игры: {_currentGameId})";
         }
+
         private void btnExitFromGame_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -377,11 +369,13 @@ namespace GameForClients
             try
             {
                 Clipboard.SetText(_currentGameId.ToString());
+                logger.Info("ID игры скопирован: {0}", _currentGameId);
                 MessageBox.Show("ID игры скопирован в буфер обмена!", "Успешно",
                                MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
+                logger.Error(ex, "Ошибка при копировании ID игры.");
                 MessageBox.Show($"Ошибка при копировании: {ex.Message}", "Ошибка",
                                MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -395,10 +389,10 @@ namespace GameForClients
 
             if (result == DialogResult.Yes)
             {
+                logger.Info("Игрок сдался", _currentPlayerId);
                 this.Close();
                 var endForm = new ForEndOfGame(false);
                 endForm.ShowDialog();
-
             }
         }
     }

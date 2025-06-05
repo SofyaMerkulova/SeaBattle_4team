@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GameData.Datas.Configurations
 {
+    /// <summary>
+    /// Конфигурация кораблей
+    /// </summary>
     public class ShipConfig : IEntityTypeConfiguration<Ship>
     {
         public void Configure(EntityTypeBuilder<Ship> builder)

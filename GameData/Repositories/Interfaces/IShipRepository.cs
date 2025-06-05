@@ -2,6 +2,9 @@
 
 namespace GameData.Repositories.Interfaces
 {
+    /// <summary>
+    /// Интерфейс для репозитория кораблей
+    /// </summary>
     public interface IShipRepository
     {
         Task<List<Ship>> GetAllAsync();

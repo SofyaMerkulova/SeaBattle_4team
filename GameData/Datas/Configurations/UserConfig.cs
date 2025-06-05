@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GameData.Datas.Configurations
 {
+    /// <summary>
+    /// Конфигурация пользователей
+    /// </summary>
     public class UserConfig : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)

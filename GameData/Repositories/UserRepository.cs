@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GameData.Models;
+using GameData.Repositories.Interfaces;
 
 
 namespace GameData.Repositories
@@ -19,7 +20,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Возвращает пользователя по его ID
         /// </summary>
-        public async Task<User> GetByIdAsync(int id)
+        public async Task<User> GetByIdAsync(Guid id)
         {
             return await _context.Users
                 .FindAsync(id);

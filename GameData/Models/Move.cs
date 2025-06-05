@@ -2,12 +2,12 @@
 {
     public class Move
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public int GameId { get; set; }
+        public Guid GameId { get; set; }
         public Game? Game { get; set; }
 
-        public int PlayerId { get; set; }
+        public Guid PlayerId { get; set; }
         public User? Player { get; set; }
 
         public int X { get; set; }

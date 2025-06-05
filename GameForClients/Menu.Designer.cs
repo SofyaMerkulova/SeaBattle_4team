@@ -31,6 +31,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
             panel1 = new Panel();
+            lblForStartNewGame = new Label();
+            lblForID = new Label();
+            txtForID = new TextBox();
             btnForJoinGame = new Button();
             btnFor = new Button();
             btnForStart = new Button();
@@ -40,6 +43,9 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(100, 180, 220, 250);
+            panel1.Controls.Add(lblForStartNewGame);
+            panel1.Controls.Add(lblForID);
+            panel1.Controls.Add(txtForID);
             panel1.Controls.Add(btnForJoinGame);
             panel1.Controls.Add(btnFor);
             panel1.Controls.Add(btnForStart);
@@ -48,6 +54,39 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1188, 631);
             panel1.TabIndex = 0;
+            // 
+            // lblForStartNewGame
+            // 
+            lblForStartNewGame.AutoSize = true;
+            lblForStartNewGame.BackColor = Color.White;
+            lblForStartNewGame.Font = new Font("Sitka Text", 13.7999992F, FontStyle.Bold, GraphicsUnit.Point);
+            lblForStartNewGame.ForeColor = Color.FromArgb(49, 56, 87);
+            lblForStartNewGame.Location = new Point(411, 9);
+            lblForStartNewGame.Name = "lblForStartNewGame";
+            lblForStartNewGame.Size = new Size(331, 33);
+            lblForStartNewGame.TabIndex = 12;
+            lblForStartNewGame.Text = "Начните свою новую игру";
+            // 
+            // lblForID
+            // 
+            lblForID.AutoSize = true;
+            lblForID.BackColor = Color.White;
+            lblForID.Font = new Font("Sitka Text", 13.7999992F, FontStyle.Bold, GraphicsUnit.Point);
+            lblForID.ForeColor = Color.FromArgb(49, 56, 87);
+            lblForID.Location = new Point(376, 174);
+            lblForID.Name = "lblForID";
+            lblForID.Size = new Size(408, 33);
+            lblForID.TabIndex = 11;
+            lblForID.Text = "Введите ID существующей игры ";
+            // 
+            // txtForID
+            // 
+            txtForID.AcceptsReturn = true;
+            txtForID.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Regular, GraphicsUnit.Point);
+            txtForID.Location = new Point(270, 219);
+            txtForID.Name = "txtForID";
+            txtForID.Size = new Size(636, 51);
+            txtForID.TabIndex = 10;
             // 
             // btnForJoinGame
             // 
@@ -86,7 +125,7 @@
             btnForStart.FlatStyle = FlatStyle.Flat;
             btnForStart.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             btnForStart.ForeColor = Color.FromArgb(155, 194, 216);
-            btnForStart.Location = new Point(354, 154);
+            btnForStart.Location = new Point(354, 67);
             btnForStart.Name = "btnForStart";
             btnForStart.Size = new Size(450, 89);
             btnForStart.TabIndex = 7;
@@ -109,6 +148,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Меню";
             panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -118,5 +158,8 @@
         private Button btnForStart;
         private Button btnFor;
         private Button btnForJoinGame;
+        private TextBox txtForID;
+        private Label lblForID;
+        private Label lblForStartNewGame;
     }
 }

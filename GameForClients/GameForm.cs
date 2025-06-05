@@ -1,6 +1,7 @@
 ﻿using GameData.Models;
 using GameData.Repositories;
-using GameForClients.Servies;
+using GameData.Repositories.Interfaces;
+using GameForClients.Servies.InferfacesForServ;
 
 namespace GameForClients
 {
@@ -9,23 +10,25 @@ namespace GameForClients
     /// </summary>
     public partial class GameForm : Form
     {
+
         private readonly IMoveRepository moveRepository;
         private readonly IGameRepository _gameRepo;
+        private System.Windows.Forms.Timer gameSyncTimer;
+
         private bool _isWaitingForOpponent;
-        private readonly GameService _gameService;
+        private readonly IGameService _gameService;
         private readonly IShipRepository _shipRepo;
-        private readonly int _currentPlayerId;
-        private int _currentGameId;
+        private readonly Guid _currentPlayerId;
+        private Guid _currentGameId;
         private List<Ship> _playerShips = new List<Ship>();
-        private List<ForCounterShips> _enemyShips = new List<ForCounterShips>();
+
         private HashSet<Point> _enemyHits = new HashSet<Point>();
-        private System.Windows.Forms.Timer _syncTimer;
-
-
+        private readonly bool _isWinner;
+        private bool _isSyncInProgress = false;
         private enum GamePhase { Placement, Battle }
         private GamePhase _currentPhase = GamePhase.Placement;
 
-        public GameForm(GameService gameService, IGameRepository gameRepo, IMoveRepository moveRepository, int playerId, int? existingGameId = null)
+        public GameForm(IGameService gameService, IGameRepository gameRepo, IMoveRepository moveRepository, Guid playerId, Guid? existingGameId = null)
         {
             this.moveRepository = moveRepository;
             _gameService = gameService;
@@ -34,13 +37,15 @@ namespace GameForClients
             _shipRepo = new ShipRepository(new DbForGame());
             InitializeComponent();
             InitializeGameAsync(existingGameId);
+            btnCopyId.Click += btnCopyId_Click;
+            gameSyncTimer = new System.Windows.Forms.Timer();
+            gameSyncTimer.Interval = 1500;
+            gameSyncTimer.Tick += SyncGameState;
+            gameSyncTimer.Start();
         }
         private void SetupShipPlacement()
         {
             _currentPhase = GamePhase.Placement;
-            this.Text = "Расстановка кораблей";
-
-
             foreach (Control c in panelPlayer.Controls)
             {
                 if (c is Button btn)
@@ -58,7 +63,8 @@ namespace GameForClients
             }
         }
 
-        private async void InitializeGameAsync(int? existingGameId = null)
+
+        private async void InitializeGameAsync(Guid? existingGameId = null)
         {
             try
             {
@@ -93,70 +99,101 @@ namespace GameForClients
                 {
                     _currentGameId = await _gameService.CreateGame(_currentPlayerId);
                     _playerShips = new List<Ship>();
-
                     CreateGameBoards();
-                    MessageBox.Show("Расставьте свои корабли на левом поле");
+                    MessageBox.Show($"Ваш ID игры: {_currentGameId}\n Дайте его второму игроку.");
                     SetupShipPlacement();
-
                     _isWaitingForOpponent = true;
-                    MessageBox.Show("Ожидаем второго игрока...");
-                    StartOpponentWaitingTimer();
+
                 }
-                _syncTimer = new System.Windows.Forms.Timer { Interval = 1000 };
-                _syncTimer.Tick += SyncGameState;
-                _syncTimer.Start();
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка инициализации: {ex.Message}");
                 this.Close();
             }
+
         }
-      
+
         private async void SyncGameState(object sender, EventArgs e)
         {
-            var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
-            var enemyMoves = allMoves.Where(m => m.PlayerId != _currentPlayerId);
+            if (_isSyncInProgress) return;
+            _isSyncInProgress = true;
 
-            foreach (var move in enemyMoves)
-            {
-                var btn = panelPlayer.Controls
-                    .OfType<Button>()
-                    .FirstOrDefault(b => ((Point)b.Tag).X == move.X &&
-                                       ((Point)b.Tag).Y == move.Y);
-
-                if (btn != null)
-                {
-                    btn.BackColor = move.IsHit ? Color.Red : Color.White;
-                }
-            }
-        }
-        private void StartOpponentWaitingTimer()
-        {
-            var timer = new System.Windows.Forms.Timer { Interval = 1000 };
-            timer.Tick += async (s, e) =>
+            try
             {
                 var game = await _gameRepo.GetByIdAsync(_currentGameId);
-                if (game.Player2Id != null)
+
+                if (game.WinnerId != null)
                 {
-                    timer.Stop();
-                    _isWaitingForOpponent = false;
-                    if (_playerShips.Count == 0)
+                    gameSyncTimer.Stop();
+
+                    if (game.WinnerId == _currentPlayerId)
                     {
-                        MessageBox.Show("Второй игрок подключился! Расставьте корабли.");
+                        var endForm = new ForEndOfGame(true); // победа
+                        endForm.ShowDialog();
                     }
                     else
                     {
+                        var endForm = new ForEndOfGame(false); // поражение
+                        endForm.ShowDialog();
+                    }
 
-                        _currentPhase = GamePhase.Battle;
-                        EnableBattleMode();
-                        MessageBox.Show("Второй игрок подключился! Начинаем бой.");
+                    this.Close();
+                    return;
+                }
+                var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
+                var enemyMoves = allMoves.Where(m => m.PlayerId != _currentPlayerId);
+
+                foreach (var move in enemyMoves)
+                {
+                    var btn = panelPlayer.Controls.OfType<Button>()
+                        .FirstOrDefault(b => ((Point)b.Tag) == new Point(move.X, move.Y));
+
+                    if (btn != null)
+                    {
+                        bool isHit = _playerShips.Any(s => s.Cells.Split(';')
+                            .Contains($"{move.X},{move.Y}"));
+
+                        btn.BackgroundImage = isHit
+                            ? Properties.Resources.hit
+                            : Properties.Resources.miss;
+                        btn.BackgroundImageLayout = ImageLayout.Stretch;
+
+                        if (isHit) _enemyHits.Add(new Point(move.X, move.Y));
                     }
                 }
-            };
-            timer.Start();
-        }
 
+                UpdateShipsCounter();
+
+                var myMoves = allMoves
+                    .Where(m => m.PlayerId == _currentPlayerId)
+                    .ToList();
+
+                foreach (var move in myMoves)
+                {
+                    var btn = panelEnemy.Controls.OfType<Button>()
+                        .FirstOrDefault(b => ((Point)b.Tag) == new Point(move.X, move.Y));
+
+                    if (btn != null)
+                    {
+                        btn.BackgroundImage = move.IsHit
+                            ? Properties.Resources.hit
+                            : Properties.Resources.miss;
+                        btn.BackgroundImageLayout = ImageLayout.Stretch;
+                        btn.Enabled = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка синхронизации: {ex.Message}");
+            }
+            finally
+            {
+                _isSyncInProgress = false;
+            }
+        }
         private void CreateGameBoards()
         {
             CreateBoard(panelPlayer, false);
@@ -220,6 +257,23 @@ namespace GameForClients
                 }
             }
         }
+        private void UpdateShipsCounter()
+        {
+            int aliveCells = 0;
+            foreach (var ship in _playerShips)
+            {
+                var cells = ship.Cells.Split(';');
+                foreach (var cell in cells)
+                {
+                    var coords = cell.Split(',');
+                    var point = new Point(int.Parse(coords[0]), int.Parse(coords[1]));
+                    if (!_enemyHits.Contains(point))
+                        aliveCells++;
+                }
+            }
+
+
+        }
         private async void PlaceShip_Click(object sender, EventArgs e)
         {
             var btn = (Button)sender;
@@ -268,43 +322,84 @@ namespace GameForClients
 
         private async void AttackEnemy_Click(object sender, EventArgs e)
         {
-            var allMoves = await moveRepository.GetByGameIdAsync(_currentGameId);
-            int myMoves = allMoves.Count(m => m.PlayerId == _currentPlayerId);
-            int enemyMoves = allMoves.Count(m => m.PlayerId != _currentPlayerId);
-            if (myMoves > enemyMoves)
+            var game = await _gameRepo.GetByIdAsync(_currentGameId);
+
+            if (game.WinnerId != null && game.WinnerId != _currentPlayerId)
             {
-                MessageBox.Show("Ожидайте хода противника!");
+                MessageBox.Show("Вы проиграли. Игра уже завершена!");
+                var endForm = new ForEndOfGame(false);
+                this.Close();
+                return;
+            }
+            if (game.WinnerId == _currentPlayerId)
+            {
+                MessageBox.Show("Вы уже победили!");
                 return;
             }
 
             var btn = (Button)sender;
             var pos = (Point)btn.Tag;
 
-            if (await moveRepository.WasHit(_currentGameId, pos.X, pos.Y))
+            if ((await moveRepository.GetByGameIdAsync(_currentGameId))
+                .Any(m => m.PlayerId == _currentPlayerId && m.X == pos.X && m.Y == pos.Y))
             {
                 MessageBox.Show("Вы уже стреляли в эту клетку!");
                 return;
             }
-            bool isHit = await _gameService.MakeMove(_currentGameId, _currentPlayerId, pos.X, pos.Y);
-            btn.BackColor = isHit ? Color.Red : Color.White;
-            btn.Enabled = false;
 
+            bool isHit = await _gameService.MakeMove(_currentGameId, _currentPlayerId, pos.X, pos.Y);
+            btn.BackgroundImage = isHit ? Properties.Resources.hit : Properties.Resources.miss;
+            btn.BackgroundImageLayout = ImageLayout.Stretch;
+            btn.Enabled = false;
             if (await _gameService.IsGameOver(_currentGameId, _currentPlayerId))
             {
-                _syncTimer.Stop();
-                MessageBox.Show("Вы победили!");
+                await _gameService.SetWinner(_currentGameId, _currentPlayerId);
+
+                var endForm = new ForEndOfGame(true); // победитель
+                endForm.ShowDialog();
                 this.Close();
             }
         }
+
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            this.Text = $"Морской бой (Игрок {_currentPlayerId})";
-        }
 
+            this.Text = $"Морской бой (ID игры: {_currentGameId})";
+        }
         private void btnExitFromGame_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void btnCopyId_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(_currentGameId.ToString());
+                MessageBox.Show("ID игры скопирован в буфер обмена!", "Успешно",
+                               MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при копировании: {ex.Message}", "Ошибка",
+                               MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnForEnd_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите сдаться?",
+                              "Подтвердите",
+                              MessageBoxButtons.YesNo);
+
+            if (result == DialogResult.Yes)
+            {
+                this.Close();
+                var endForm = new ForEndOfGame(false);
+                endForm.ShowDialog();
+
+            }
         }
     }
 }

@@ -1,17 +1,25 @@
 ﻿namespace GameData.Models
 {
+    public enum GameStatus
+    {
+        Waiting,
+        PlacingShips,
+        InProgress,
+        Finished
+    }
+
     public class Game
     {
-        public int Id { get; set; }
-        public int? Player1Id { get; set; }
-        public User? Player1 { get; set; }
+        public Guid Id { get; set; }
+        public Guid? PlayerFirstId { get; set; }
+        public User? PlayerFirst { get; set; }
 
-        public int? Player2Id { get; set; }
-        public User? Player2 { get; set; }
+        public Guid? PlayerSecondId { get; set; }
+        public User? PlayerSecond { get; set; }
 
-        public string Status { get; set; } = "Waiting";
+        public GameStatus Status { get; set; } = GameStatus.Waiting;
 
-        public int? WinnerId { get; set; }
+        public Guid? WinnerId { get; set; }
         public User? Winner { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

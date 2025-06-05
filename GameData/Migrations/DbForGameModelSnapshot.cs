@@ -23,22 +23,20 @@ namespace GameData.Migrations
 
             modelBuilder.Entity("GameData.Models.Game", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int?>("Player1Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("PlayerFirstId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Player2Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("PlayerSecondId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -46,80 +44,28 @@ namespace GameData.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("Waiting");
 
-                    b.Property<int?>("WinnerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Player1Id");
+                    b.HasIndex("PlayerFirstId");
 
-                    b.HasIndex("Player2Id");
+                    b.HasIndex("PlayerSecondId");
 
                     b.HasIndex("WinnerId");
 
                     b.ToTable("Games");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2025, 6, 2, 9, 46, 39, 750, DateTimeKind.Utc).AddTicks(3830),
-                            Player1Id = 1,
-                            Player2Id = 2,
-                            Status = "Active"
-                        });
-                });
-
-            modelBuilder.Entity("GameData.Models.Log", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Logs");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Action = "User logged in",
-                            CreatedAt = new DateTime(2025, 6, 2, 8, 46, 39, 750, DateTimeKind.Utc).AddTicks(3958),
-                            UserId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Action = "User started game",
-                            CreatedAt = new DateTime(2025, 6, 2, 9, 16, 39, 750, DateTimeKind.Utc).AddTicks(3959),
-                            UserId = 2
-                        });
                 });
 
             modelBuilder.Entity("GameData.Models.Move", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsHit")
                         .HasColumnType("boolean");
@@ -127,8 +73,8 @@ namespace GameData.Migrations
                     b.Property<DateTime>("MoveTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("X")
                         .HasColumnType("integer");
@@ -143,47 +89,23 @@ namespace GameData.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("Moves");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            GameId = 1,
-                            IsHit = false,
-                            MoveTime = new DateTime(2025, 6, 2, 10, 46, 39, 750, DateTimeKind.Utc).AddTicks(3879),
-                            PlayerId = 1,
-                            X = 0,
-                            Y = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            GameId = 1,
-                            IsHit = true,
-                            MoveTime = new DateTime(2025, 6, 2, 11, 46, 39, 750, DateTimeKind.Utc).AddTicks(3881),
-                            PlayerId = 2,
-                            X = 1,
-                            Y = 0
-                        });
                 });
 
             modelBuilder.Entity("GameData.Models.Ship", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Cells")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ShipType")
                         .HasMaxLength(20)
@@ -196,33 +118,13 @@ namespace GameData.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("Ships");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Cells = "0,0;0,1;0,2",
-                            GameId = 1,
-                            PlayerId = 1,
-                            ShipType = "Destroyer"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Cells = "1,0;1,1;1,2",
-                            GameId = 1,
-                            PlayerId = 2,
-                            ShipType = "Submarine"
-                        });
                 });
 
             modelBuilder.Entity("GameData.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -243,34 +145,18 @@ namespace GameData.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 6, 3, 9, 46, 39, 732, DateTimeKind.Utc).AddTicks(4490),
-                            PasswordHash = "C77rrffMKpQG5EwTPhfwvKBvxtCscyH7zq0FqyvDL1kAPJGH4BxsymNr/heJmrrt",
-                            Username = "player1"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 6, 3, 9, 46, 39, 750, DateTimeKind.Utc).AddTicks(3697),
-                            PasswordHash = "0u+g39pK/XqgPxnAbBckc4DwOpl/IC/sKmMc3kSwlYn0ac0AZQboXZ1VfTqqDNNj",
-                            Username = "player2"
-                        });
                 });
 
             modelBuilder.Entity("GameData.Models.Game", b =>
                 {
-                    b.HasOne("GameData.Models.User", "Player1")
-                        .WithMany("GamesAsPlayer1")
-                        .HasForeignKey("Player1Id")
+                    b.HasOne("GameData.Models.User", "PlayerFirst")
+                        .WithMany("GamesAsPlayerFirst")
+                        .HasForeignKey("PlayerFirstId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("GameData.Models.User", "Player2")
-                        .WithMany("GamesAsPlayer2")
-                        .HasForeignKey("Player2Id")
+                    b.HasOne("GameData.Models.User", "PlayerSecond")
+                        .WithMany("GamesAsPlayerSecond")
+                        .HasForeignKey("PlayerSecondId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("GameData.Models.User", "Winner")
@@ -278,22 +164,11 @@ namespace GameData.Migrations
                         .HasForeignKey("WinnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Player1");
+                    b.Navigation("PlayerFirst");
 
-                    b.Navigation("Player2");
+                    b.Navigation("PlayerSecond");
 
                     b.Navigation("Winner");
-                });
-
-            modelBuilder.Entity("GameData.Models.Log", b =>
-                {
-                    b.HasOne("GameData.Models.User", "User")
-                        .WithMany("Logs")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GameData.Models.Move", b =>
@@ -343,18 +218,17 @@ namespace GameData.Migrations
 
             modelBuilder.Entity("GameData.Models.User", b =>
                 {
-                    b.Navigation("GamesAsPlayer1");
+                    b.Navigation("GamesAsPlayerFirst");
 
-                    b.Navigation("GamesAsPlayer2");
+                    b.Navigation("GamesAsPlayerSecond");
 
                     b.Navigation("GamesWon");
-
-                    b.Navigation("Logs");
 
                     b.Navigation("Moves");
 
                     b.Navigation("Ships");
                 });
+#pragma warning restore 612, 618
         }
     }
 }

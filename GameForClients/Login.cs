@@ -1,7 +1,7 @@
 using GameData;
-using GameData.Models;  
-using GameData.Repositories;
-using GameForClients.Servies;
+using GameData.Models;
+using GameData.Repositories.Interfaces;
+using GameForClients.Servies.InferfacesForServ;
 using Microsoft.EntityFrameworkCore;
 namespace GameForClients
 {
@@ -10,20 +10,20 @@ namespace GameForClients
     /// </summary>
     public partial class Login : Form
     {
-        private readonly GameService _gameService;
+        private readonly IGameService _gameService;
         private readonly IUserRepository _userRepository;
         private readonly DbForGame _dbContext;
         private readonly IGameRepository _gameRepository;
         private static int _currentGameId = 0;
         private static int _playersLoggedIn = 0;
         private static List<int> _playerIds = new List<int>();
-        public Login(DbForGame dbContext, GameService gameService,
+        public Login(DbForGame dbContext, IGameService gameService,
             IGameRepository gameRepository, IUserRepository userRepository)
         {
             _dbContext = dbContext;
             _gameService = gameService;
             _gameRepository = gameRepository;
-            _userRepository = userRepository; 
+            _userRepository = userRepository;
             InitializeComponent();
             txtForPassword.PasswordChar = 'Х';
             checkPassword.CheckedChanged += (s, e) =>
@@ -46,7 +46,7 @@ namespace GameForClients
 
             if (activeGame == null)
             {
-                
+
                 var gameId = await _gameService.CreateGame(user.Id);
                 var menuForm = new Menu(_gameService, _gameRepository, user.Id);
                 menuForm.Show();
@@ -117,5 +117,7 @@ namespace GameForClients
             MessageBox.Show("–егистраци€ прошла успешно!", "”спех",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        
     }
 }

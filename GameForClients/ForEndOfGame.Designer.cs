@@ -59,7 +59,6 @@
             lblGameName.Size = new Size(694, 116);
             lblGameName.TabIndex = 9;
             lblGameName.Text = "Результат игры";
-            lblGameName.Click += lblGameName_Click;
             // 
             // btnForAgainStartGame
             // 
@@ -102,6 +101,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "ForEndOfGame";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Итоги игры";
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

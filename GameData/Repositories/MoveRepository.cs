@@ -1,5 +1,6 @@
 ﻿using GameData.Models;
 using Microsoft.EntityFrameworkCore;
+using GameData.Repositories.Interfaces;
 
 namespace GameData.Repositories
 {
@@ -17,14 +18,14 @@ namespace GameData.Repositories
         /// <summary>  
         /// Возвращает ход по ID
         /// </summary>  
-        public async Task<Move> GetByIdAsync(int id)
+        public async Task<Move> GetByIdAsync(Guid id)
         {
             return await _dbContext.Moves.FindAsync(id);
         }
         /// <summary>  
         /// Возвращает список ходов по ID игры
         /// </summary> 
-        public async Task<List<Move>> GetByGameIdAsync(int gameId)
+        public async Task<List<Move>> GetByGameIdAsync(Guid gameId)
         {
             return await _dbContext.Moves
                 .Where(m => m.GameId == gameId)
@@ -33,7 +34,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Проверяет попадает ли выстрел в корабль 
         /// </summary>  
-        public async Task<bool> CheckHitAsync(int gameId, int x, int y)
+        public async Task<bool> CheckHitAsync(Guid gameId, int x, int y)
         {
             var ships = await _dbContext.Ships
                 .Where(s => s.GameId == gameId)
@@ -54,7 +55,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Определяет было ли по клетке в определенной игре по ее ID
         /// </summary>  
-        public async Task<bool> WasHit(int gameId, int x, int y)
+        public async Task<bool> WasHit(Guid gameId, int x, int y)
         {
             return await _dbContext.Moves
                 .AnyAsync(m => m.GameId == gameId && m.X == x && m.Y == y && m.IsHit);

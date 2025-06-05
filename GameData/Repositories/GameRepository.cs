@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GameData.Models;
+using GameData.Repositories.Interfaces;
 
 namespace GameData.Repositories
 {
@@ -20,20 +21,20 @@ namespace GameData.Repositories
         public async Task<List<Game>> GetAllAsync()
         {
             return await _dbContext.Games
-                .Include(g => g.Player1)
-                .Include(g => g.Player2)
+                .Include(g => g.PlayerFirst)
+                .Include(g => g.PlayerSecond)
                 .AsNoTracking()
                 .ToListAsync();
         }
         /// <summary>  
         /// Получение игры по ID
         /// </summary>  
-        public async Task<Game> GetByIdAsync(int id)
+        public async Task<Game> GetByIdAsync(Guid id)
         {
             using var context = new DbForGame();
             return await context.Games
-                .Include(g => g.Player1)
-                .Include(g => g.Player2)
+                .Include(g => g.PlayerFirst)
+                .Include(g => g.PlayerSecond)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
@@ -44,7 +45,7 @@ namespace GameData.Repositories
         {
             using var context = new DbForGame();
             return await context.Games
-                .Where(g => g.Player2Id == null && g.Status == "Waiting")
+                .Where(g => g.PlayerSecondId == null && g.Status == GameStatus.Waiting)
                 .OrderByDescending(g => g.CreatedDate)
                 .FirstOrDefaultAsync();
         }

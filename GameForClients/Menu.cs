@@ -1,5 +1,6 @@
-﻿using GameData.Repositories;
+﻿using GameData.Repositories.Interfaces;
 using GameForClients.Servies;
+using GameForClients.Servies.InferfacesForServ;
 
 namespace GameForClients
 {
@@ -8,11 +9,11 @@ namespace GameForClients
     /// </summary>
     public partial class Menu : Form
     {
-        private readonly GameService _gameService;
-        private readonly int _currentPlayerId;
+        private readonly IGameService _gameService;
+        private readonly Guid _currentPlayerId;
         private readonly IGameRepository _gameRepo;
 
-        public Menu(GameService gameService, IGameRepository gameRepo, int playerId)
+        public Menu(IGameService gameService, IGameRepository gameRepo, Guid playerId)
         {
             _gameService = gameService;
             _gameRepo = gameRepo;
@@ -24,7 +25,7 @@ namespace GameForClients
         {
             try
             {
-                int gameId = await _gameService.CreateGame(_currentPlayerId);
+                Guid gameId = await _gameService.CreateGame(_currentPlayerId);
 
                 var gameForm = new GameForm(_gameService, _gameRepo, _gameService.MoveRepo, _currentPlayerId, gameId);
                 gameForm.Show();
@@ -40,26 +41,30 @@ namespace GameForClients
         {
             try
             {
-                var availableGames = await _gameService.FindOpenGames(_currentPlayerId);
-                if (availableGames.Count == 0)
+                if (!string.IsNullOrEmpty(txtForID.Text))
                 {
-                    MessageBox.Show("Нет доступных игр для подключения");
+                    if (Guid.TryParse(txtForID.Text, out var gameId))
+                    {
+                        bool joinResult = await _gameService.JoinGame(gameId, _currentPlayerId);
+
+                        if (joinResult)
+                        {
+                            var gameForm = new GameForm(_gameService, _gameRepo, _gameService.MoveRepo, _currentPlayerId, gameId);
+                            gameForm.Show();
+                            this.Hide();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не удалось осуществить подключение к игре, убедитесь в корректности данных.");
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Некорректный формат ID игры");
+                    }
                     return;
                 }
 
-                var selectedGame = availableGames[0];
-                bool joinResult = await _gameService.JoinGame(selectedGame.Id, _currentPlayerId);
-
-                if (joinResult)
-                {
-                    var gameForm = new GameForm(_gameService, _gameRepo, _gameService.MoveRepo, _currentPlayerId, selectedGame.Id);
-                    gameForm.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("Не удалось присоединиться к игре");
-                }
             }
             catch (Exception ex)
             {
@@ -67,9 +72,12 @@ namespace GameForClients
             }
         }
 
+
         private void btnFor_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
+
+        
     }
 }

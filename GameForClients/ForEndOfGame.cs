@@ -1,38 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using GameData.Repositories.Interfaces;
+using GameForClients.Servies.InferfacesForServ;
 
 namespace GameForClients
 {
-    /// <summary>  
-    /// Форма для завершения игры с определением победителя
-    /// </summary>
     public partial class ForEndOfGame : Form
     {
-        public ForEndOfGame()
+       
+        private readonly Guid playerId;
+        private readonly IGameService _gameService;
+        private readonly IUserRepository _userRepo;
+        private readonly DbForGame _dbContext;
+        private readonly IGameRepository _gameRepo;
+        private readonly bool _isWinner;
+       
+
+        public ForEndOfGame(bool isWinner)
         {
             InitializeComponent();
+            _isWinner = isWinner;
+            
+            lblGameName.Text = _isWinner
+                ? " Вы победили!"
+                : "Вы проиграли";
         }
 
         private void btnForEndGame_Click(object sender, EventArgs e)
         {
-
+            var menuForm = new Menu(_gameService,_gameRepo,playerId); 
+            menuForm.Show();
+            this.Close();
         }
 
         private void btnForAgainStartGame_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void lblGameName_Click(object sender, EventArgs e)
-        {
-
+            var loginForm = new Login(_dbContext, _gameService, _gameRepo, _userRepo);
+            loginForm.Show();
+            this.Close();
         }
     }
 }

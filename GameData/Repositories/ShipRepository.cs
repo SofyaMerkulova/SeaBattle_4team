@@ -1,5 +1,6 @@
 ﻿using GameData.Models;
 using Microsoft.EntityFrameworkCore;
+using GameData.Repositories.Interfaces;
 
 namespace GameData.Repositories
 {
@@ -27,7 +28,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Возвращает все корабли из игры по ее ID
         /// </summary>
-        public async Task<List<Ship>> GetByGameIdAsync(int gameId)
+        public async Task<List<Ship>> GetByGameIdAsync(Guid gameId)
         {
             return await _dbContext.Ships
                 .Where(s => s.GameId == gameId)
@@ -36,7 +37,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Возвращает корабли по ID
         /// </summary>
-        public async Task<Ship?> GetByIdAsync(int id)
+        public async Task<Ship?> GetByIdAsync(Guid id)
         {
             return await _dbContext.Ships
                 .FindAsync(id);
@@ -44,7 +45,7 @@ namespace GameData.Repositories
         /// <summary>  
         /// Вовзращает игру и игрока по ID
         /// </summary>
-        public async Task<List<Ship>> GetByGameAndPlayerAsync(int gameId, int playerId)
+        public async Task<List<Ship>> GetByGameAndPlayerAsync(Guid gameId, Guid playerId)
         {
             return await _dbContext.Ships
                 .Where(s => s.GameId == gameId && s.PlayerId == playerId)

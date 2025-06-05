@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
             panel2 = new Panel();
+            lblLogin = new Label();
+            btnCopyId = new Button();
             panelEnemy = new Panel();
             panelPlayer = new Panel();
             btnExitFromGame = new Button();
@@ -42,6 +44,8 @@
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(100, 180, 220, 250);
+            panel2.Controls.Add(lblLogin);
+            panel2.Controls.Add(btnCopyId);
             panel2.Controls.Add(panelEnemy);
             panel2.Controls.Add(panelPlayer);
             panel2.Controls.Add(btnExitFromGame);
@@ -51,14 +55,41 @@
             panel2.Dock = DockStyle.Fill;
             panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(1013, 620);
+            panel2.Size = new Size(1188, 631);
             panel2.TabIndex = 1;
+            // 
+            // lblLogin
+            // 
+            lblLogin.AutoSize = true;
+            lblLogin.BackColor = Color.White;
+            lblLogin.Font = new Font("Sitka Text", 10.1999989F, FontStyle.Bold, GraphicsUnit.Point);
+            lblLogin.ForeColor = Color.FromArgb(49, 56, 87);
+            lblLogin.Location = new Point(912, 0);
+            lblLogin.Name = "lblLogin";
+            lblLogin.Size = new Size(276, 24);
+            lblLogin.TabIndex = 12;
+            lblLogin.Text = "Нажмите чтобы скопировать ";
+            // 
+            // btnCopyId
+            // 
+            btnCopyId.BackColor = Color.FromArgb(133, 143, 180);
+            btnCopyId.FlatAppearance.BorderColor = Color.FromArgb(133, 143, 180);
+            btnCopyId.FlatStyle = FlatStyle.Flat;
+            btnCopyId.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
+            btnCopyId.ForeColor = Color.FromArgb(49, 56, 87);
+            btnCopyId.Location = new Point(1039, 30);
+            btnCopyId.Name = "btnCopyId";
+            btnCopyId.Size = new Size(137, 63);
+            btnCopyId.TabIndex = 11;
+            btnCopyId.Text = "ID";
+            btnCopyId.UseVisualStyleBackColor = false;
+            btnCopyId.Click += btnCopyId_Click;
             // 
             // panelEnemy
             // 
             panelEnemy.Anchor = AnchorStyles.None;
             panelEnemy.BackColor = Color.MidnightBlue;
-            panelEnemy.Location = new Point(463, 81);
+            panelEnemy.Location = new Point(551, 86);
             panelEnemy.Name = "panelEnemy";
             panelEnemy.Size = new Size(454, 454);
             panelEnemy.TabIndex = 10;
@@ -67,7 +98,7 @@
             // 
             panelPlayer.Anchor = AnchorStyles.None;
             panelPlayer.BackColor = Color.MidnightBlue;
-            panelPlayer.Location = new Point(3, 81);
+            panelPlayer.Location = new Point(91, 86);
             panelPlayer.Name = "panelPlayer";
             panelPlayer.Size = new Size(454, 454);
             panelPlayer.TabIndex = 9;
@@ -79,7 +110,7 @@
             btnExitFromGame.FlatStyle = FlatStyle.Flat;
             btnExitFromGame.Font = new Font("Sitka Text", 16.1999989F, FontStyle.Bold, GraphicsUnit.Point);
             btnExitFromGame.ForeColor = Color.FromArgb(49, 56, 87);
-            btnExitFromGame.Location = new Point(505, 541);
+            btnExitFromGame.Location = new Point(576, 552);
             btnExitFromGame.Name = "btnExitFromGame";
             btnExitFromGame.Size = new Size(344, 76);
             btnExitFromGame.TabIndex = 8;
@@ -94,12 +125,13 @@
             btnForEnd.FlatStyle = FlatStyle.Flat;
             btnForEnd.Font = new Font("Sitka Text", 16.1999989F, FontStyle.Bold, GraphicsUnit.Point);
             btnForEnd.ForeColor = Color.FromArgb(49, 56, 87);
-            btnForEnd.Location = new Point(66, 541);
+            btnForEnd.Location = new Point(147, 552);
             btnForEnd.Name = "btnForEnd";
             btnForEnd.Size = new Size(344, 76);
             btnForEnd.TabIndex = 7;
             btnForEnd.Text = "Завершить и сдаться";
             btnForEnd.UseVisualStyleBackColor = false;
+            btnForEnd.Click += btnForEnd_Click;
             // 
             // lblEnemyName
             // 
@@ -108,7 +140,7 @@
             lblEnemyName.BackColor = Color.FromArgb(133, 143, 180);
             lblEnemyName.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             lblEnemyName.ForeColor = Color.FromArgb(49, 56, 87);
-            lblEnemyName.Location = new Point(463, 25);
+            lblEnemyName.Location = new Point(576, 30);
             lblEnemyName.Name = "lblEnemyName";
             lblEnemyName.Size = new Size(361, 53);
             lblEnemyName.TabIndex = 3;
@@ -120,7 +152,7 @@
             lblGamerName.BackColor = Color.FromArgb(133, 143, 180);
             lblGamerName.Font = new Font("Sitka Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point);
             lblGamerName.ForeColor = Color.FromArgb(49, 56, 87);
-            lblGamerName.Location = new Point(27, 25);
+            lblGamerName.Location = new Point(180, 30);
             lblGamerName.Name = "lblGamerName";
             lblGamerName.Size = new Size(225, 53);
             lblGamerName.TabIndex = 2;
@@ -132,7 +164,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(1013, 620);
+            ClientSize = new Size(1188, 631);
             Controls.Add(panel2);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -154,5 +186,7 @@
         private Button btnForEnd;
         private Panel panelEnemy;
         private Panel panelPlayer;
+        private Button btnCopyId;
+        private Label lblLogin;
     }
 }

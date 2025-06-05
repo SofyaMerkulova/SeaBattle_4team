@@ -150,6 +150,7 @@
             lblLogin.Size = new Size(394, 62);
             lblLogin.TabIndex = 0;
             lblLogin.Text = "Введите   логин:";
+            
             // 
             // Login
             // 
